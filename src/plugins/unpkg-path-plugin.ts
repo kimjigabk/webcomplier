@@ -12,11 +12,14 @@ export const unpkgPathPlugin = () => {
           return { path: args.path, namespace: 'a' };
         }
 
-        // handle multi-file pakcage (import inside package we imported)
+        // handle multi-file pakcage (relative path import inside package we imported)
         if (args.path.includes('./') || args.path.includes('../')) {
           return {
             namespace: 'a',
-            path: new URL(args.path, args.importer + '/').href,
+            path: new URL(
+              args.path,
+              'https://unpkg.com' + args.resolveDir + '/'
+            ).href,
           };
         }
         // Figure out where the requested file is (from import/require)
@@ -40,7 +43,7 @@ export const unpkgPathPlugin = () => {
           return {
             loader: 'jsx',
             contents: `
-              import message from 'medium-test-pkg';
+              const message = require('nested-test-pkg');
               console.log(message);
             `,
           };
@@ -48,10 +51,12 @@ export const unpkgPathPlugin = () => {
         // args.path is updated
 
         //Attempt to load that file
-        const { data } = await axios.get(args.path); // content of index.js file
+        const { data, request } = await axios.get(args.path); // content of index.js file
+
         return {
           loader: 'jsx',
           contents: data,
+          resolveDir: new URL('./', request.responseURL).pathname,
         };
       });
     },
