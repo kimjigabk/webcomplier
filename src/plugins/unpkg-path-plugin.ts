@@ -59,7 +59,9 @@ export const unpkgPathPlugin = () => {
         // Check if data is in cache
         // key: args.path
         // value: object {loader: .. , contents: .., resolveDir: ..}
-        const cachedResult = await fileCache.getItem(args.path);
+        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
+          args.path
+        );
         if (cachedResult) {
           return cachedResult;
         }
