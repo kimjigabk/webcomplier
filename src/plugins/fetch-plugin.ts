@@ -23,24 +23,31 @@ export const fetchPlugin = (inputCode: string) => {
         // Check if data is in cache
         // key: args.path
         // value: object {loader: .. , contents: .., resolveDir: ..}
-        const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
-          args.path
-        );
-        if (cachedResult) {
-          return cachedResult;
-        }
+
+        // const cachedResult = await fileCache.getItem<esbuild.OnLoadResult>(
+        //   args.path
+        // );
+        // if (cachedResult) {
+        //   return cachedResult;
+        // }
 
         // otherwise store result in cache
         const { data, request } = await axios.get(args.path); // content of index.js file
 
         // also handle css import
         const fileType = args.path.match(/.css$/) ? 'css' : 'jsx';
-        // include css in js
+
+        // including css file in js
+        // import 'bulma/css/bulma.css'
+        const escapedData = data
+          .replace(/\n/g, '')
+          .replace(/"/g, '\\""')
+          .replace(/'/g, "\\'"); // so we don't close out string in contents
         const contents =
           fileType === 'css'
             ? `
             const style = document.createElement('style');
-            style.innerText = 'body { background-color: "red" }';
+            style.innerText = '${escapedData}';
             document.head.appendChild(style);
           `
             : data;
