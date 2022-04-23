@@ -32,9 +32,21 @@ export const fetchPlugin = (inputCode: string) => {
 
         // otherwise store result in cache
         const { data, request } = await axios.get(args.path); // content of index.js file
+
+        // also handle css import
+        const fileType = args.path.match(/.css$/) ? 'css' : 'jsx';
+        // include css in js
+        const contents =
+          fileType === 'css'
+            ? `
+            const style = document.createElement('style');
+            style.innerText = 'body { background-color: "red" }';
+            document.head.appendChild(style);
+          `
+            : data;
         const result: esbuild.OnLoadResult = {
           loader: 'jsx',
-          contents: data,
+          contents,
           resolveDir: new URL('./', request.responseURL).pathname,
         };
         await fileCache.setItem(args.path, result);
