@@ -1,25 +1,36 @@
 import ReactDOM from 'react-dom';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import * as esbuild from 'esbuild-wasm';
 
 const App = () => {
   const [input, setInput] = useState('');
   const [code, setCode] = useState('');
+  const ref = useRef<any>();
 
   const startService = async () => {
-    const service = await esbuild.startService({
+    ref.current = await esbuild.startService({
       worker: true,
       wasmURL: '/esbuild.wasm',
     });
-    console.log(service);
   };
   useEffect(() => {
     startService();
   }, []);
 
-  const onClick = () => {
-    console.log(input);
+  const onClick = async () => {
+    // run after startService is activated
+    if (!ref.current) {
+      return;
+    }
+    // used for transpiling process
+    const result = await ref.current.transform(input, {
+      loader: 'jsx',
+      target: 'es2015', // option code being trasnpiled
+    });
+
+    setCode(result.code);
   };
+
   return (
     <div>
       <textarea
@@ -29,7 +40,7 @@ const App = () => {
       <div>
         <button onClick={onClick}>uSbmit</button>
       </div>
-      <pre></pre>
+      <pre>{code}</pre>
     </div>
   );
 };
