@@ -12,6 +12,13 @@ export const unpkgPathPlugin = () => {
           return { path: args.path, namespace: 'a' };
         }
 
+        // handle multi-file pakcage (import inside package we imported)
+        if (args.path.includes('./') || args.path.includes('../')) {
+          return {
+            namespace: 'a',
+            path: new URL(args.path, args.importer + '/').href,
+          };
+        }
         // Figure out where the requested file is (from import/require)
         return {
           namespace: 'a',
@@ -33,7 +40,7 @@ export const unpkgPathPlugin = () => {
           return {
             loader: 'jsx',
             contents: `
-              import message from 'tiny-test-pkg';
+              import message from 'medium-test-pkg';
               console.log(message);
             `,
           };
