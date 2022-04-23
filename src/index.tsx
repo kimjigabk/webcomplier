@@ -1,7 +1,37 @@
 import ReactDOM from 'react-dom';
+import { useState, useEffect } from 'react';
+import * as esbuild from 'esbuild-wasm';
 
 const App = () => {
-  return <h1>hi</h1>;
+  const [input, setInput] = useState('');
+  const [code, setCode] = useState('');
+
+  const startService = async () => {
+    const service = await esbuild.startService({
+      worker: true,
+      wasmURL: '/esbuild.wasm',
+    });
+    console.log(service);
+  };
+  useEffect(() => {
+    startService();
+  }, []);
+
+  const onClick = () => {
+    console.log(input);
+  };
+  return (
+    <div>
+      <textarea
+        value={input}
+        onChange={(e) => setInput(e.target.value)}
+      ></textarea>
+      <div>
+        <button onClick={onClick}>uSbmit</button>
+      </div>
+      <pre></pre>
+    </div>
+  );
 };
 
 ReactDOM.render(<App />, document.querySelector('#root'));
