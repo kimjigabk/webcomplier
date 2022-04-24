@@ -43,14 +43,19 @@ const App = () => {
     setCode(result.outputFiles[0].text);
   };
 
+  const initialvalue = "console.log('Hi')";
+  useEffect(() => {
+    setInput(initialvalue);
+  }, []);
+
   return (
     <div>
       <CodeEditor
-        initialValue="console.log('Hi')"
+        initialValue={initialvalue}
         onChange={(value) => setInput(value)}
       />
       <div>
-        <button onClick={onClick}>uSbmit</button>
+        <button onClick={onClick}>Run Code</button>
       </div>
       <PreviewIframe code={code} />
     </div>
