@@ -4,10 +4,10 @@ import * as esbuild from 'esbuild-wasm';
 
 import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
 import { fetchPlugin } from './plugins/fetch-plugin';
+import CodeEditor from './components/code-editor';
 
 const App = () => {
   const [input, setInput] = useState('');
-  // const [code, setCode] = useState('');
   const ref = useRef<any>();
   const iframe = useRef<any>();
 
@@ -40,10 +40,8 @@ const App = () => {
         global: 'window',
       },
     });
-    // console.log(result);
-
-    // bundled code
-    // setCode(result.outputFiles[0].text);
+    // bundled code =
+    // result.outputFiles[0].text
 
     // send message to child iframe
     iframe.current.contentWindow.postMessage(result.outputFiles[0].text, '*');
@@ -72,6 +70,10 @@ const App = () => {
 
   return (
     <div>
+      <CodeEditor
+        initialValue="console.log(Hi)"
+        onChange={(value) => setInput(value)}
+      />
       <textarea
         value={input}
         onChange={(e) => setInput(e.target.value)}
@@ -79,7 +81,6 @@ const App = () => {
       <div>
         <button onClick={onClick}>uSbmit</button>
       </div>
-      {/* <pre>{code}</pre> */}
 
       <iframe
         ref={iframe}
