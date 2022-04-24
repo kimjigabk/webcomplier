@@ -5,11 +5,12 @@ import * as esbuild from 'esbuild-wasm';
 import { unpkgPathPlugin } from './plugins/unpkg-path-plugin';
 import { fetchPlugin } from './plugins/fetch-plugin';
 import CodeEditor from './components/code-editor';
+import PreviewIframe from './components/preview-iframe';
 
 const App = () => {
   const [input, setInput] = useState('');
+  const [code, setCode] = useState('');
   const ref = useRef<any>();
-  const iframe = useRef<any>();
 
   const startService = async () => {
     ref.current = await esbuild.startService({
@@ -27,9 +28,6 @@ const App = () => {
       return;
     }
 
-    // reset ifrem srcdoc every time user clicks submit
-    iframe.current.srcdoc = html;
-
     const result = await ref.current.build({
       entryPoints: ['index.js'],
       bundle: true,
@@ -42,52 +40,19 @@ const App = () => {
     });
     // bundled code =
     // result.outputFiles[0].text
-
-    // send message to child iframe
-    iframe.current.contentWindow.postMessage(result.outputFiles[0].text, '*');
+    setCode(result.outputFiles[0].text);
   };
-
-  // add event listener to receive Message from parent
-  const html = `
-    <html>
-      <head></head>
-      <body>
-        <div id="root"></div>
-        <script>
-          window.addEventListener('message', (event) => {
-            try {
-              eval(event.data);
-            } catch (err) {
-              const root = document.querySelector('#root');
-              root.innerHTML = '<div style="color: red;"><h4>Runtime Error</h4>' + err + '</div>'
-              throw err;
-            };
-          }, false);
-        </script>
-      </body>
-    </html>
-    `;
 
   return (
     <div>
       <CodeEditor
-        initialValue="console.log(Hi)"
+        initialValue="console.log('Hi')"
         onChange={(value) => setInput(value)}
       />
-      <textarea
-        value={input}
-        onChange={(e) => setInput(e.target.value)}
-      ></textarea>
       <div>
         <button onClick={onClick}>uSbmit</button>
       </div>
-
-      <iframe
-        ref={iframe}
-        sandbox="allow-scripts"
-        title="child"
-        srcDoc={html}
-      />
+      <PreviewIframe code={code} />
     </div>
   );
 };
